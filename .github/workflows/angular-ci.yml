@@ -1,0 +1,74 @@
+name: Reusable Angular CI
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: Node.js version
+        type: string
+        default: "22.x"
+      working-directory:
+        description: Directory containing package.json
+        type: string
+        default: "."
+      lint-command:
+        description: Lint command (no-op when the script is absent)
+        type: string
+        default: "npm run lint --if-present"
+      test-command:
+        description: Unit test command
+        type: string
+        default: "npm test -- --watch=false --browsers=ChromeHeadless"
+      build-command:
+        description: Production build command
+        type: string
+        default: "npm run build"
+      run-e2e:
+        description: Run Playwright end-to-end tests after the build
+        type: boolean
+        default: false
+      e2e-command:
+        description: End-to-end test command
+        type: string
+        default: "npm run test:e2e --if-present"
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: ${{ inputs.lint-command }}
+
+      - name: Unit tests
+        run: ${{ inputs.test-command }}
+
+      - name: Build
+        run: ${{ inputs.build-command }}
+
+      - name: Install Playwright browsers
+        if: ${{ inputs.run-e2e }}
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        if: ${{ inputs.run-e2e }}
+        run: ${{ inputs.e2e-command }}

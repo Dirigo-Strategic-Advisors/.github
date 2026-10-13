@@ -1,0 +1,75 @@
+name: Reusable Environment Deploy (foundation)
+
+# Provider-neutral deployment foundation.
+# The cloud provider is intentionally NOT selected yet (see infrastructure docs).
+# This workflow is gated by GitHub Environments (required reviewers on production)
+# and is safe to run: it validates prerequisites and stops before touching any
+# real infrastructure until a provider step is added below.
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub Environment to deploy to (development|staging|production)
+        type: string
+        required: true
+      artifact-name:
+        description: Name of a build artifact to deploy (optional)
+        type: string
+        default: ""
+      app-name:
+        description: Logical application name
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  id-token: write # OIDC for short-lived cloud credentials (used once a provider is wired)
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Resolve target environment configuration
+        env:
+          TARGET_ENV: ${{ inputs.environment }}
+          APP_NAME: ${{ inputs.app-name }}
+        run: |
+          echo "Application : $APP_NAME"
+          echo "Environment : $TARGET_ENV"
+          echo "Ref         : $GITHUB_REF"
+          echo "SHA         : $GITHUB_SHA"
+
+      - name: Validate environment secrets are present
+        env:
+          # Set DEPLOY_TARGET (and credentials) as environment-scoped secrets/variables.
+          DEPLOY_TARGET: ${{ vars.DEPLOY_TARGET }}
+        run: |
+          if [ -z "$DEPLOY_TARGET" ]; then
+            echo "::warning::No DEPLOY_TARGET variable configured for this environment; deployment steps are not yet wired."
+          else
+            echo "Deploy target: $DEPLOY_TARGET"
+          fi
+
+      # ------------------------------------------------------------------
+      # Add the provider-specific deployment step here once chosen, e.g.:
+      #
+      # - name: Azure login (OIDC)
+      #   uses: azure/login@<pinned-sha>
+      #   with:
+      #     client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      #     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #
+      # - name: Deploy
+      #   run: az webapp deploy --name "$APP_NAME-$TARGET_ENV" --src-path ./publish
+      # ------------------------------------------------------------------
+
+      - name: Deployment step placeholder
+        run: echo "No provider deployment is configured yet. See infrastructure/docs/deployment.md and docs/rollback.md."
