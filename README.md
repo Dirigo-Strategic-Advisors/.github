@@ -12,7 +12,7 @@ defaults. GitHub uses these files as the default for any repository in the
 | `CONTRIBUTING.md` | Contribution defaults (default) |
 | `CODE_OF_CONDUCT.md` | Community code of conduct (default) |
 | `SUPPORT.md` | Where to get help (default) |
-| `ISSUE_TEMPLATE/` | Default issue forms |
+| `.github/ISSUE_TEMPLATE/` | Default issue forms |
 | `PULL_REQUEST_TEMPLATE.md` | Default pull request template |
 | `.github/workflows/` | **Reusable** CI/CD workflows callable by every repository |
 
