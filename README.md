@@ -52,3 +52,5 @@ Available reusable workflows:
 - `angular-ci.yml` — install/lint/test/build Angular (+ optional Playwright e2e)
 - `deploy-environment.yml` — environment-gated deployment foundation
 - `dependency-review.yml` — fail PRs that add vulnerable dependencies
+  (**public repos or repos with GitHub Advanced Security only** — it fails on private
+  repos without GHAS)

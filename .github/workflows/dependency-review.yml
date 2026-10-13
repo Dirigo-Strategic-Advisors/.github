@@ -1,5 +1,10 @@
 name: Reusable Dependency Review
 
+# NOTE: actions/dependency-review-action requires GitHub Advanced Security (GHAS) on
+# private repositories. On private repos without GHAS it fails with
+# "Dependency review is not supported on this repository". Only call this from public
+# repositories or repositories where GHAS is enabled.
+
 on:
   workflow_call:
 
