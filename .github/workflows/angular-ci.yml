@@ -11,6 +11,10 @@ on:
         description: Directory containing package.json
         type: string
         default: "."
+      install-command:
+        description: Command used to install dependencies
+        type: string
+        default: "npm ci || npm install --no-audit --no-fund"
       lint-command:
         description: Lint command (no-op when the script is absent)
         type: string
@@ -54,7 +58,7 @@ jobs:
           cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: ${{ inputs.install-command }}
 
       - name: Lint
         run: ${{ inputs.lint-command }}
